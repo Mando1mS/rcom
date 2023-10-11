@@ -10,8 +10,7 @@
 ////////////////////////////////////////////////
 int llopen(LinkLayer connectionParameters)
 {
-    // TODO
-
+    // TODO   
     return 1;
 }
 
