@@ -11,6 +11,8 @@
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
+#include <link_layer.h>
+#include <alarm.h>
 
 
 #define BAUDRATE B38400
@@ -21,7 +23,11 @@
 #define FALSE 0
 #define TRUE 1
 
+#define BUF_SIZE 5  
+#define SET 0x03
+#define FLAG 0x7E
+#define ADDR 0x03
 
-bool write_noncanonical(LinkLayer connectionParameters);
+int write_noncanonical(LinkLayer dados);
 
 #endif // WRITE_NONCANONICAL.H

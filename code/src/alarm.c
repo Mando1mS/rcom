@@ -1,6 +1,6 @@
 #include "alarm.h"
 
-void alarmHandler(int signal);
+void alarmHandler(int signal)
 {
     alarmEnabled = FALSE;
     alarmCount++;
