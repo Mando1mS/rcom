@@ -29,7 +29,7 @@ int port_connection(char *serialPortName, int baudRate){
     // Set input mode (non-canonical, no echo,...)
     newtio.c_lflag = 0;
     newtio.c_cc[VTIME] = 0; // Inter-character timer unused
-    newtio.c_cc[VMIN] = 5;  // Blocking read until 5 chars received
+    newtio.c_cc[VMIN] = 0;  // Blocking read until 5 chars received
 
     // VTIME e VMIN should be changed in order to protect with a
     // timeout the reception of the following character(s)
@@ -40,8 +40,6 @@ int port_connection(char *serialPortName, int baudRate){
     // depending on the value of queue_selector:
     //   TCIFLUSH - flushes data received but not read.
     tcflush(fd, TCIOFLUSH);
-
-    printf("New termios structure set\n");
     // Set new port settings
     if (tcsetattr(fd, TCSANOW, &newtio) == -1)
     {

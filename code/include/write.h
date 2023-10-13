@@ -13,5 +13,5 @@
 
 
 int write_set(int fd);
-
+int write_ua(int fd);
 #endif // _WRITE_H_

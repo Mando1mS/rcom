@@ -1,9 +1,13 @@
 #include "read.h"
 int read_ua(int fd, MachineState state){
-    printf("read_ua\n");
     unsigned char byte;
+    int byteread=0;
     while (state != STOP) {
-        if (read(fd, &byte, 1) > 0) {
+
+        byteread=read(fd, &byte, 1);
+        //printf("byte read: %d\n",byteread);
+        if (byteread > -1) {
+            //printf("byte:%x\n",byte);
             switch (state) {
                 case START:
                     if(byte == FLAG) state = FLAG_RCV;
@@ -30,7 +34,7 @@ int read_ua(int fd, MachineState state){
                     break;
             }
         }else{
-            break;
+            exit(0);
         }
     }
     return 1;

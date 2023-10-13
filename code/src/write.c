@@ -7,3 +7,12 @@ int write_set(int fd){
     sleep(1);
     return bytes;
 }
+
+int write_ua(int fd)
+{
+    printf("write_set\n");
+    unsigned char buf[5] = {FLAG, A_RX, FRAME_UA, (A_RX^FRAME_UA), FLAG};
+    int bytes = write(fd, buf, 5);
+    sleep(1);
+    return bytes;
+}
