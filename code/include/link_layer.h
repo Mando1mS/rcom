@@ -4,11 +4,18 @@
 #ifndef _LINK_LAYER_H_
 #define _LINK_LAYER_H_
 
+#include <unistd.h>
+#include <signal.h>
+#include <stdio.h>
+#include "define_frame.h"
+
+
 typedef enum
 {
     LlTx,
     LlRx,
 } LinkLayerRole;
+
 
 typedef struct
 {
@@ -23,9 +30,7 @@ typedef struct
 // Maximum number of bytes that application layer should send to link layer
 #define MAX_PAYLOAD_SIZE 1000
 
-// MISC
-#define FALSE 0
-#define TRUE 1
+void alarmHandler(int signal);
 
 // Open a connection using the "port" parameters defined in struct linkLayer.
 // Return "1" on success or "-1" on error.

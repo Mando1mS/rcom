@@ -1,7 +1,5 @@
-#ifndef _WRITE_NONCANONICAL_H_
-#define _WRITE_NONCANONICAL_H_
-
-
+#ifndef _PORT_CONNECTION_H
+#define _PORT_CONNECTION_H
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -11,23 +9,18 @@
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
-#include <link_layer.h>
-#include <alarm.h>
 
-
+// Baudrate settings are defined in <asm/termbits.h>, which is
+// included by <termios.h>
 #define BAUDRATE B38400
 #define _POSIX_SOURCE 1 // POSIX compliant source
-
-
 
 #define FALSE 0
 #define TRUE 1
 
-#define BUF_SIZE 5  
-#define SET 0x03
+#define BUF_SIZE 5
 #define FLAG 0x7E
-#define ADDR 0x03
 
-int write_noncanonical(LinkLayer dados);
 
-#endif // WRITE_NONCANONICAL.H
+int port_connection(char *portName, int baudRate);
+#endif
