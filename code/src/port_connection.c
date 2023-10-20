@@ -50,3 +50,13 @@ int port_connection(char *serialPortName, int baudRate){
     printf("New termios structure set\n");
     return fd;
 }
+
+int port_restore(int fd, struct termios *oldtio){
+    if (tcsetattr(fd, TCSANOW, oldtio) == -1)
+    {
+        perror("tcsetattr");
+        exit(-1);
+    }
+    close(fd);
+    return 0;
+}

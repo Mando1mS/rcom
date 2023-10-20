@@ -106,7 +106,7 @@ int llopen(LinkLayer connectionParameters)
     default:
         return 0;   
     }
-    return 1;
+    return fd;
 }
 
 ////////////////////////////////////////////////
@@ -134,7 +134,6 @@ int llread(unsigned char *packet)
 ////////////////////////////////////////////////
 int llclose(int showStatistics)
 {
-    // TODO
 
     return 1;
 }
