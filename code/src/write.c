@@ -16,3 +16,48 @@ int write_ua(int fd)
     sleep(1);
     return bytes;
 }
+unsigned char *create_packet(int fd,unsigned char *packet,int packetSize,int *count_tx)
+{
+    int framesize=6+packetSize;
+    unsigned char* frame= malloc(sizeof(unsigned char)* (framesize));
+    frame[0]=FLAG;
+    frame[1]=A_TX;
+    if(count_tx==0)
+    {
+        frame[2]=FRAME_INF_0;
+    }
+    else
+    {
+        frame[2]=FRAME_INF_1;
+    }
+    frame[3]=frame[2]^frame[1];
+    memcpy(frame+4,packet,packetSize);
+    //Falta byte stuffing aqui
+    int j=3;
+    for(int i=0;i<packetSize;i++)
+    {
+        if(packet[i]==FLAG)
+        {
+            frame=realloc(frame,framesize++);
+            frame[j++]= FRAME_ESC;
+            frame[j++]= FRAME_ESC_FLAG;
+        }
+        else if(packet[i]==FRAME_ESC)
+        {
+            frame=realloc(frame,framesize++);
+            frame[j++]= FRAME_ESC;
+            frame[j++]= FRAME_ESC_ESC;
+        }
+        else{
+            frame[j++]=packet[i];
+        }
+    }
+    unsigned char bcc2=0x00;
+    for(int i=0;i<packetSize;i++)
+    {
+        bcc2 ^= packet[i];
+    }     
+    frame[j++]=bcc2;
+    frame[j++]=FLAG;
+    return frame;
+}

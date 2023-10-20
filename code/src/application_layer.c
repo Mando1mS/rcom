@@ -12,9 +12,9 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     connectionParameters.baudRate = baudRate;
     connectionParameters.nRetransmissions = nTries;
     connectionParameters.timeout = timeout;
-    int pass_open = llopen(connectionParameters);
+    int fd = llopen(connectionParameters);
 
-    if(pass_open == 0){
+    if(fd == 0){
         perror("Error establishing port connection.");
         exit(-1);
     } else{
@@ -26,9 +26,9 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             printf("Executando o llwrite()\n");
 
             unsigned char *source=NULL;
-            int buffersize=0;
+            long int buffersize=0;
 
-            FILE *fp=fopen(filename,"rb");
+            FILE *fp=fopen(filename,"r");
             if(fp==NULL)
             {
                 printf("Error opening file\n");
@@ -41,7 +41,6 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                     ferror(fp);
                     exit(-1);
                 }
-
                 source=malloc(sizeof(unsigned char)*(buffersize+1));
 
                 if(fseek(fp,0L,SEEK_SET)== TRUE) {
@@ -58,16 +57,24 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                 else{ source[newLength+1]='\0';}
             }
             fclose(fp);
-
-            //Print the buffer
-            int i=0;
-            while(source[i]!='\0')
+            unsigned int packet_size;
+            unsigned char *packet_start= control_packet(2,filename,buffersize,&packet_size);
+            if(llwrite(fd,packet_start,packet_size)!=1)
             {
-                printf("Byte: %d \n",source[i]);
+                free(packet_start);
+                perror("Llwrite failed\n");
+                exit(-1);
+            }
+            free(packet_start);
+            //Print the buffer
+            /*
+            int i=0;
+            while(i!=50)
+            {
+                printf("Byte: %u \n",source[i]);
                 i++;
             }
-
-            llwrite(source,buffersize);
+            */
             free(source);
             printf("llwrite() executado\n");
         }else if(connectionParameters.role==LlRx)

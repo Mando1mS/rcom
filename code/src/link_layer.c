@@ -6,9 +6,10 @@
 // MISC
 #define _POSIX_SOURCE 1 // POSIX compliant source
 
+int count_tx=0;
 int nRetransmissions = 0;
 int alarmEnabled = FALSE;
-
+int timeout=0;
 void alarmHandler(int signal)
 {
     alarmEnabled = FALSE;
@@ -25,7 +26,7 @@ int llopen(LinkLayer connectionParameters)
     int fd = port_connection(connectionParameters.serialPort, connectionParameters.baudRate);
 
     nRetransmissions = connectionParameters.nRetransmissions;
-    int timeout = connectionParameters.timeout;
+    timeout = connectionParameters.timeout;
     MachineState state = START;
     unsigned char byte = 0x00;
 
@@ -112,11 +113,91 @@ int llopen(LinkLayer connectionParameters)
 ////////////////////////////////////////////////
 // LLWRITE
 ////////////////////////////////////////////////
-int llwrite(const unsigned char *buf, int bufSize)
+int llwrite(int fd,const unsigned char *buf, int bufSize)
 {
-    // TODO
-
-    return 0;
+    MachineState state = START;
+    unsigned char *frame=create_packet(fd,buf,bufSize,&count_tx);
+    (void)signal(SIGALRM, alarmHandler);
+    unsigned char byte=0x00;
+    int acepted=0;
+    int rejected =0;
+    while(nRetransmissions>0 && state!=STOP){
+        unsigned char answer=0x00;
+        if(alarmEnabled == FALSE){
+                write(fd,frame,bufSize+6);
+                //sleep(1);
+                alarm(timeout);
+                alarmEnabled = TRUE;
+                acepted=0;
+                rejected=0;
+        } 
+        while(alarmEnabled==TRUE && acepted==FALSE && rejected==FALSE){
+            int byteread = read(fd, &byte, 1);
+            switch (state) {
+                case START:
+                    if(byte == FLAG) state = FLAG_RCV;
+                    break;
+                case FLAG_RCV:
+                    if(byte == A_RX) state = A_RCV;
+                    else if(byte != FLAG) state = START;
+                    break;
+                case A_RCV:
+                    if(byte == FRAME_RR_0 || byte == FRAME_RR_1 ||
+                     byte == FRAME_REJ_0 || byte == FRAME_REJ_1 ||
+                      byte == FRAME_DISC)
+                    {
+                        state = C_RCV;
+                        answer=byte;
+                    } 
+                    else if(byte == FLAG) state = FLAG_RCV;
+                    else state = START;
+                    break;
+                case C_RCV:
+                    if(byte == (A_RX ^ answer)) state = BCC_OK;
+                    else if(byte == FLAG) state = FLAG_RCV;
+                    else state = START;
+                    break;
+                case BCC_OK:
+                    if(byte == FLAG) state = STOP;
+                    else state = START;
+                    break;
+                default:
+                    break;
+            }
+            if(answer==0x00)
+            {
+                continue;
+            }
+            else if(answer==FRAME_REJ_0 || answer==FRAME_REJ_1)
+            {
+                printf("Packet rejeitado\n");
+                rejected=1;
+            }  
+            else if(answer==FRAME_RR_0 || answer==FRAME_RR_1)
+            {
+                acepted=1;
+                count_tx=(count_tx+1)%2;
+            }
+            else continue;
+        }
+        if(acepted==TRUE)
+            break;
+        if (state != STOP)
+        {
+            free(frame);
+            return -1;
+        }
+    }
+    free(frame);
+    if(acepted==TRUE)
+    {
+        return 1;
+    }
+    else 
+    {
+        llclose(fd);
+        return 0;
+    }
 }
 
 ////////////////////////////////////////////////

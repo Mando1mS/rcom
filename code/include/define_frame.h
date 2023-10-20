@@ -19,6 +19,10 @@
 #define FRAME_REJ_0 0x01
 #define FRAME_REJ_1 0x81
 #define FRAME_DISC 0x0B
+//STUFFING
+#define FRAME_ESC 0x7D
+#define FRAME_ESC_FLAG 0x5E
+#define FRAME_ESC_ESC 0X5D
 
 typedef enum
 {

@@ -5,6 +5,7 @@
 #define _APPLICATION_LAYER_H_
 
 #include "link_layer.h"
+#include "packet.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
