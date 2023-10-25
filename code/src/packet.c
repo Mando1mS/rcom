@@ -48,3 +48,24 @@ unsigned char *data_packet_maker( const unsigned char *data_to_send, long int da
 
     return packet;
 }
+unsigned char* read_control_packet(unsigned char * received_packet,int received_packet_size, int *file_size){
+    // 1st element - File size
+    unsigned char file_size_bytes[received_packet[2]];
+    memcpy(file_size_bytes,received_packet+3,received_packet[2]);
+    /*
+     * The for loop iterates through the file_size_bytes array. It uses bitwise
+     * left-shift and bitwise OR operations to properly combine the individual
+     * bytes into a single integer value. The shift (8 * (received_packet[2] - 1 - i))
+     * is used to position each byte correctly within the 4-byte integer representation.
+     * */
+    for(int i=0;i<received_packet[2];i++)
+    {
+        *file_size |= (file_size_bytes[i] << (8 * (received_packet[2] - 1 - i)));
+    }
+
+    // 2nd element - File name
+    unsigned char filename_size=received_packet[3+received_packet[2]];
+    unsigned char * filename= malloc(sizeof(unsigned char)*filename_size);
+    memcpy(filename,received_packet+2+received_packet[2]+2,filename_size);
+    return filename;
+}

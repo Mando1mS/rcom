@@ -108,7 +108,17 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             printf("Executando o llread()\n");
             unsigned char *received_packet= malloc(sizeof(unsigned char)*MAX_PACKET_SIZE);
             int received_packet_size=0;
+            int file_size=0;
+            // Tratar o packet de controlo
+            while((received_packet_size=llread(fd,received_packet))==-1);
+            if(received_packet[0]!=2)
+            {
+                printf("Error receiving control packet.\n");
+                exit(-1);
+            }
+            unsigned char* file_name=read_control_packet(received_packet,received_packet_size, &file_size);
             llread(fd,received_packet);
+            free(received_packet);
             llclose(fd,role);
             //TODO
         }
