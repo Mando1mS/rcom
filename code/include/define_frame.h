@@ -23,7 +23,8 @@
 #define FRAME_ESC 0x7D
 #define FRAME_ESC_FLAG 0x5E
 #define FRAME_ESC_ESC 0X5D
-
+// Packet size
+#define MAX_PACKET_SIZE 1000
 typedef enum
 {
     START,

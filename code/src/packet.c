@@ -19,3 +19,7 @@ unsigned char *control_packet(int controlo,char *filename,long int filesize,unsi
     }
     return packet;
 }
+
+unsigned char *data_packet_maker(long int packet_number,unsigned char*data_to_send, long int data_size, unsigned int *packet_size){
+
+}
