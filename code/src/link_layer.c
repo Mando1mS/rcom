@@ -269,7 +269,7 @@ int llread(int fd, unsigned char *packet)
             if(bcc2 == calculated_bcc2){
                 send_supervision_frame(fd,1,&count_rx);
                 count_rx = (count_rx + 1)%2;
-                return 1;
+                return i;
             }else{
                 printf("Error: Package rejected\n");
                 send_supervision_frame(fd,0,&count_rx);
