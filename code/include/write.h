@@ -15,4 +15,6 @@
 int write_set(int fd);
 int write_ua(int fd);
 unsigned char *create_packet(int fd,unsigned char *packet,int packetSize,int *count_tx);
+void send_supervision_frame(int fd,int acceptance,int *count_rx);
+
 #endif // _WRITE_H_

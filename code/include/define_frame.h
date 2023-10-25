@@ -34,7 +34,9 @@ typedef enum
     C_RCV,
     BCC,
     BCC_OK,
-    STOP
+    STOP,
+    READING,
+    ESC_HANDLER
 } MachineState;
 
 

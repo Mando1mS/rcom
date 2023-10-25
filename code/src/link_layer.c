@@ -6,6 +6,7 @@
 // MISC
 
 int count_tx=0;
+int count_rx=0;
 int nRetransmissions = 0;
 int alarmEnabled = FALSE;
 int timeout=0;
@@ -202,11 +203,81 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
 ////////////////////////////////////////////////
 // LLREAD
 ////////////////////////////////////////////////
-int llread(unsigned char *packet)
+int llread(int fd, unsigned char *packet)
 {
-    // TODO
+    MachineState state = START;
+    unsigned char byte = 0x00;
+    unsigned char answer=0x00;
+    int i=0;
 
-    return 0;
+    while(state!=STOP){
+        read(fd, &byte, 1);
+        switch (state) {
+            case START:
+                if(byte == FLAG) state = FLAG_RCV;
+                break;
+            case FLAG_RCV:
+                if(byte == A_TX) state = A_RCV;
+                else if(byte != FLAG) state = START;
+                break;
+            case A_RCV:
+                if(byte == FRAME_INF_0 || byte == FRAME_INF_1 )
+                {
+                    state = C_RCV;
+                    answer=byte;
+                }
+                else if(byte == FLAG) state = FLAG_RCV;
+                else state = START;
+                break;
+            case C_RCV:
+                if(byte == (A_TX ^ answer)) state = READING;
+                else if(byte == FLAG) state = FLAG_RCV;
+                else state = START;
+                break;
+            case READING:
+                if(byte == FRAME_ESC) {
+                    state = ESC_HANDLER;
+                }else if(byte == FLAG){
+                    state = STOP;
+                }else{
+                    packet[i++]=byte;
+                }
+                break;
+            case ESC_HANDLER:
+                if(byte == FRAME_ESC_FLAG|| byte == FRAME_ESC_ESC) {
+                    packet[i++] = byte;
+                    state = READING;
+                }else {
+                    //If after ESC byte is not ESC_FLAG or ESC_ESC, then it is an error
+                    //because bytestuffing is not being used correctly
+                    state = START;
+                }
+                break;
+            default:
+                break;
+        }
+        //The full package was transmitted and saved in packet array
+        // Now we need to check if the BCC2 is correct
+        if(state == STOP){
+            //Received BCC2
+            unsigned char bcc2 = packet[i--];
+            //Remove BCC2 from packet so that i can calculate current BCC2
+            packet[i] = '\0';
+            unsigned char calculated_bcc2 = packet[0];
+            for(int j = 1; j < i; j++)
+                calculated_bcc2 ^= packet[j];
+            if(bcc2 == calculated_bcc2){
+                send_supervision_frame(fd,1,&count_rx);
+                count_rx = (count_rx + 1)%2;
+                return 1;
+            }else{
+                printf("Error: Package rejected\n");
+                send_supervision_frame(fd,0,&count_rx);
+                return -1;
+            }
+        }
+    }
+    return -1;
 }
 
 ////////////////////////////////////////////////

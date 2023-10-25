@@ -107,6 +107,11 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         }else if(connectionParameters.role==LlRx)
         {
             printf("Executando o llread()\n");
+            unsigned char *received_packet= malloc(sizeof(unsigned char)*MAX_PACKET_SIZE);
+            int received_packet_size=0;
+            llread(fd,received_packet);
+
+            //TODO
         }
 
 }

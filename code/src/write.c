@@ -61,3 +61,6 @@ unsigned char *create_packet(int fd,unsigned char *packet,int packetSize,int *co
     frame[j++]=FLAG;
     return frame;
 }
+void send_supervision_frame(int fd,int acceptance, int *count_rx){
+
+}
