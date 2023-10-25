@@ -101,7 +101,7 @@ int llopen(LinkLayer connectionParameters)
             }               
         }
         //So manda uma vez o UA.
-        write_ua(fd); 
+        write_ua(fd,LlRx); 
         if (state != STOP) return -1;
         break;
     default:
@@ -195,7 +195,7 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
     }
     else 
     {
-        llclose(fd);
+        llclose(fd,LlTx);
         return 0;
     }
 }
@@ -269,7 +269,7 @@ int llread(int fd, unsigned char *packet)
             if(bcc2 == calculated_bcc2){
                 send_supervision_frame(fd,1,&count_rx);
                 count_rx = (count_rx + 1)%2;
-                return i;
+                return 1;
             }else{
                 printf("Error: Package rejected\n");
                 send_supervision_frame(fd,0,&count_rx);
@@ -283,8 +283,100 @@ int llread(int fd, unsigned char *packet)
 ////////////////////////////////////////////////
 // LLCLOSE
 ////////////////////////////////////////////////
-int llclose(int showStatistics)
-{
-
-    return 1;
+int llclose(int fd,const char *role)
+{   
+    unsigned char byte=0x00;
+    MachineState state = START;
+    LinkLayerRole rl=strcmp(role,"rx") ? LlTx : LlRx;
+    if(rl==LlTx)
+    {
+        (void)signal(SIGALRM, alarmHandler);
+        while(nRetransmissions>0 && state!=STOP){
+            if(alarmEnabled == FALSE){
+                printf("A mandar o DISC\n");
+                write_disc(fd,rl);
+                alarm(timeout);
+                alarmEnabled = TRUE;
+            }
+            if(read_disc(fd,state)==1)
+            {
+                printf("Leu o DISC corretamente.\n");
+                //enviar o ultimo ua.
+                write_ua(fd,rl);
+                printf("Ultimo UA enviado, fechando a conexão.\n");
+                close(fd);
+            }
+            else{
+                printf("Ainda não lido\n");
+            }
+        }
+    }
+    else if(rl==LlRx)
+    {
+        printf("A espera de receber o DISC\n");
+        while(state!=STOP){
+            int byteread = read(fd, &byte, 1);
+            switch (state) {
+                case START:
+                    if(byte == FLAG) state = FLAG_RCV;
+                    break;
+                case FLAG_RCV:
+                    if(byte == A_TX) state = A_RCV;
+                    else if(byte != FLAG) state = START;
+                    break;
+                case A_RCV:
+                    if(byte == FRAME_DISC) state = C_RCV;
+                    else if(byte == FLAG) state = FLAG_RCV;
+                    else state = START;
+                    break;
+                case C_RCV:
+                    if(byte == (A_TX ^ FRAME_DISC)) state = BCC_OK;
+                    else if(byte == FLAG) state = FLAG_RCV;
+                    else state = START;
+                    break;
+                case BCC_OK:
+                    if(byte == FLAG) state = STOP;
+                    else state = START;
+                    break;
+                default: 
+                    break;
+            }               
+        }
+        if (state != STOP) return -1;
+        //So manda uma vez o DISC.
+        printf("A escrever o UA\n");
+        write_disc(fd,rl); 
+        state= START;
+        printf("A espera do UA\n");
+        while(state!=STOP){
+            int byteread = read(fd, &byte, 1);
+            switch (state) {
+                case START:
+                    if(byte == FLAG) state = FLAG_RCV;
+                    break;
+                case FLAG_RCV:
+                    if(byte == A_TX) state = A_RCV;
+                    else if(byte != FLAG) state = START;
+                    break;
+                case A_RCV:
+                    if(byte == FRAME_UA) state = C_RCV;
+                    else if(byte == FLAG) state = FLAG_RCV;
+                    else state = START;
+                    break;
+                case C_RCV:
+                    if(byte == (A_TX ^ FRAME_UA)) state = BCC_OK;
+                    else if(byte == FLAG) state = FLAG_RCV;
+                    else state = START;
+                    break;
+                case BCC_OK:
+                    if(byte == FLAG) state = STOP;
+                    else state = START;
+                    break;
+                default: 
+                    break;
+            }               
+        }
+        printf("UA lido, a fechar conexão\n");
+        close(fd);
+    }
 }

@@ -15,5 +15,7 @@ int read_set(int fd, MachineState state);
 
 int read_ua(int fd, MachineState state);
 
+int read_disc(int fd,MachineState state);
+
 
 #endif // _READ_H_

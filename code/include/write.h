@@ -10,10 +10,12 @@
 #include <termios.h>
 #include <unistd.h>
 #include "define_frame.h"
+#include "link_layer.h"
 
 
 int write_set(int fd);
-int write_ua(int fd);
+int write_ua(int fd,LinkLayerRole rl);
+int write_disc(int fd,LinkLayerRole rl);
 unsigned char *create_packet(int fd,unsigned char *packet,int packetSize,int *count_tx);
 void send_supervision_frame(int fd,int acceptance,int *count_rx);
 

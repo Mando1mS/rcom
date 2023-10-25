@@ -4,17 +4,44 @@ int write_set(int fd){
     printf("write_set\n");
     unsigned char buf[5] = {FLAG, A_TX, FRAME_SET, (A_TX^FRAME_SET), FLAG};
     int bytes = write(fd, buf, 5);
-    sleep(0.5);
+    sleep(1);
     return bytes;
 }
 
-int write_ua(int fd)
+int write_ua(int fd,LinkLayerRole rl)
 {
     printf("write_ua\n");
-    unsigned char buf[5] = {FLAG, A_RX, FRAME_UA, (A_RX^FRAME_UA), FLAG};
-    int bytes = write(fd, buf, 5);
-    sleep(0.5);
-    return bytes;
+    if(rl==LlRx)
+    {
+        unsigned char buf[5] = {FLAG, A_RX, FRAME_UA, (A_RX^FRAME_UA), FLAG};
+        int bytes = write(fd, buf, 5);
+        sleep(1);
+        return bytes;
+    }
+    else{
+        unsigned char buf[5] = {FLAG, A_TX, FRAME_UA, (A_TX^FRAME_UA), FLAG};
+        int bytes = write(fd, buf, 5);
+        sleep(1);
+        return bytes;
+    }
+}
+int write_disc(int fd,LinkLayerRole rl)
+{
+    printf("write_disc\n");
+    if(rl==LlTx)
+    {
+        unsigned char buf[5] = {FLAG, A_TX, FRAME_DISC, (A_TX^FRAME_DISC), FLAG};
+        int bytes = write(fd, buf, 5);
+        sleep(1);
+        return bytes;
+    }
+    else{
+        unsigned char buf[5] = {FLAG, A_RX, FRAME_DISC, (A_RX^FRAME_DISC), FLAG};
+        int bytes = write(fd, buf, 5);
+        sleep(1);
+        return bytes;
+    }
+    
 }
 unsigned char *create_packet(int fd,unsigned char *packet,int packetSize,int *count_tx)
 {
@@ -62,31 +89,5 @@ unsigned char *create_packet(int fd,unsigned char *packet,int packetSize,int *co
     return frame;
 }
 void send_supervision_frame(int fd,int acceptance, int *count_rx){
-    printf("write_supervision_frame\n");
-    unsigned char A=0x00;
-    if(acceptance==TRUE)
-    {
-        if(*count_rx==0)
-        {
-            A=FRAME_RR_0;
-        }
-        else
-        {
-            A=FRAME_RR_1;
-        }
-    }
-    else
-    {
-        if(*count_rx==0)
-        {
-            A=FRAME_REJ_0;
-        }
-        else
-        {
-            A=FRAME_REJ_1;
-        }
-    }
-    unsigned char buf[5] = {FLAG, A_RX, A, (A_RX^A), FLAG};
-    write(fd, buf, 5);
-    sleep(0.5);
+
 }

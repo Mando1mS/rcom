@@ -78,3 +78,42 @@ int read_set(int fd, MachineState state){
 
 }
 
+int read_disc(int fd, MachineState state){
+    unsigned char byte;
+    while (state != STOP) {
+        if (read(fd, &byte, 1) > 0) {
+            switch (state) {
+                case START:
+                    if(byte == FLAG) state = FLAG_RCV;
+                    break;
+                case FLAG_RCV:
+                    if(byte == A_RX)  state = A_RCV;
+                    else if(byte != FLAG) state = START;
+                    break;
+                case A_RCV:
+                    if(byte == FRAME_DISC) state = C_RCV;
+                    else if(byte == FLAG) state = FLAG_RCV;
+                    else state = START;
+                    break;
+                case C_RCV:
+                    if(byte == (A_RX ^ FRAME_DISC)) state = BCC_OK;
+                    else if(byte == FLAG) state = FLAG_RCV;
+                    else state = START;
+                    break;
+                case BCC_OK:
+                    if(byte == FLAG) state = STOP;
+                    else state = START;
+                    break;
+                default: 
+                    break;
+            }
+        }else{
+            break;
+        }
+    }
+    if(state == STOP)
+    {
+        return TRUE;
+    }
+    else    return FALSE;
+}
