@@ -59,7 +59,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
             fclose(fp);
 
-            unsigned int packet_size;
+            int packet_size;
             unsigned char *packet_start= control_packet(2,filename,buffersize,&packet_size);
             if(llwrite(fd,packet_start,packet_size)!=1)
             {
@@ -77,7 +77,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
                 unsigned char* data_to_send = malloc(sizeof(unsigned char)*(data_size));
                 memcpy(data_to_send, source, data_size);
-                unsigned char* data_packet = data_packet_maker(packet_number,data_to_send, data_size, &packet_size);
+                unsigned char* data_packet = data_packet_maker(data_to_send, data_size, &packet_size);
                 free(data_to_send);
                 if(llwrite(fd,data_packet,packet_size)!=1)
                 {
@@ -90,17 +90,20 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                 packet_number= (packet_number+1)%255;
                 source+=data_size;
             }
-            //Print the buffer
-            /*
-            int i=0;
-            while(i!=50)
+
+            unsigned char *packet_end= control_packet(3,filename,buffersize,&packet_size);
+            if(llwrite(fd,packet_end,packet_size)!=1)
             {
-                printf("Byte: %u \n",source[i]);
-                i++;
+                free(packet_end);
+                perror("Llwrite failed for packet start.\n");
+                exit(-1);
             }
-            */
+            free(packet_end);
+
             free(source);
+
             printf("llwrite() executado\n");
+
         }else if(connectionParameters.role==LlRx)
         {
             printf("Executando o llread()\n");

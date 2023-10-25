@@ -4,7 +4,6 @@
 #include "port_connection.h"
 #include "write.h"
 // MISC
-#define _POSIX_SOURCE 1 // POSIX compliant source
 
 int count_tx=0;
 int nRetransmissions = 0;
