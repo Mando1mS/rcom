@@ -180,6 +180,29 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
             }
             else continue;
         }
+        switch (state)
+        {
+        case START:
+            printf("Estado final: START \n");
+            break;
+        case A_RCV:
+            printf("Estado final: A_RCV \n");
+            break;
+        case C_RCV:
+            printf("Estado final: C_RCV \n");
+            break;
+        case BCC_OK:
+            printf("Estado final: BCC_OK \n");
+            break;
+        case FLAG_RCV:
+            printf("Estado final: FLAG_RCV \n");
+            break;
+        case STOP:
+        printf("Estado final: STOP\n");
+            break;
+        default:
+            break;
+        }
         if(acepted==TRUE)
             break;
         if (state != STOP)
@@ -188,6 +211,7 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
             return -1;
         }
     }
+    printf("Accepted: %c\n",acepted);
     free(frame);
     if(acepted==TRUE)
     {

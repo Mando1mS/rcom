@@ -59,10 +59,13 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
             fclose(fp);
 
-            int packet_size;
+            int packet_size=0;
+            printf("Packet size: %d\n",packet_size);
             unsigned char *packet_start= control_packet(2,filename,buffersize,&packet_size);
+            printf("Packet size: %d\n",packet_size);
             if(llwrite(fd,packet_start,packet_size)!=1)
             {
+                printf("Teste\n");
                 free(packet_start);
                 perror("Llwrite failed for packet start.\n");
                 exit(-1);
@@ -71,7 +74,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
             long int remaining_bytes=buffersize;
             long int packet_number=0;
-
+            printf("Remaining bytes: %d\n",remaining_bytes);
             while(remaining_bytes>0){
                 long int data_size = remaining_bytes > MAX_PACKET_SIZE ? MAX_PACKET_SIZE : remaining_bytes;
 
