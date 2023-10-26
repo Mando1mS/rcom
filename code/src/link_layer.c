@@ -42,7 +42,7 @@ int llopen(LinkLayer connectionParameters)
                 
             } 
 
-            int byteread = read(fd, &byte, 1);
+            read(fd, &byte, 1);
             switch (state) {
                 case START:
                     if(byte == FLAG) state = FLAG_RCV;
@@ -73,7 +73,7 @@ int llopen(LinkLayer connectionParameters)
         break;
     case LlRx:
         while(state!=STOP){
-            int byteread = read(fd, &byte, 1);
+            read(fd, &byte, 1);
             switch (state) {
                 case START:
                     if(byte == FLAG) state = FLAG_RCV;
@@ -132,7 +132,7 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
                 rejected=0;
         } 
         while(alarmEnabled==TRUE && acepted==FALSE && rejected==FALSE){
-            int byteread = read(fd, &byte, 1);
+            read(fd, &byte, 1);
             switch (state) {
                 case START:
                     if(byte == FLAG) state = FLAG_RCV;
@@ -339,7 +339,7 @@ int llclose(int fd,const char *role)
     {
         printf("A espera de receber o DISC\n");
         while(state!=STOP){
-            int byteread = read(fd, &byte, 1);
+            read(fd, &byte, 1);
             switch (state) {
                 case START:
                     if(byte == FLAG) state = FLAG_RCV;
@@ -373,7 +373,7 @@ int llclose(int fd,const char *role)
         state= START;
         printf("A espera do UA\n");
         while(state!=STOP){
-            int byteread = read(fd, &byte, 1);
+            read(fd, &byte, 1);
             switch (state) {
                 case START:
                     if(byte == FLAG) state = FLAG_RCV;
@@ -403,4 +403,5 @@ int llclose(int fd,const char *role)
         printf("UA lido, a fechar conexão\n");
         close(fd);
     }
+    return 0;
 }

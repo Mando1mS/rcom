@@ -74,7 +74,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
             long int remaining_bytes=buffersize;
             long int packet_number=0;
-            printf("Remaining bytes: %d\n",remaining_bytes);
+            printf("Remaining bytes: %ld\n",remaining_bytes);
             while(remaining_bytes>0){
                 long int data_size = remaining_bytes > MAX_PACKET_SIZE ? MAX_PACKET_SIZE : remaining_bytes;
 
@@ -121,7 +121,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             }
             unsigned char* file_name=read_control_packet(received_packet,received_packet_size, &file_size);
             llread(fd,received_packet);
-            FILE * received_file = fopen(file_name,"wb+");
+            FILE * received_file = fopen((const char*)file_name,"wb+");
             if(received_file==NULL)
             {
                 printf("Error opening file\n");

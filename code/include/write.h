@@ -16,7 +16,7 @@
 int write_set(int fd);
 int write_ua(int fd,LinkLayerRole rl);
 int write_disc(int fd,LinkLayerRole rl);
-unsigned char *create_packet(int fd,unsigned char *packet,int packetSize,int *count_tx);
+unsigned char *create_packet(int fd,const unsigned char *packet,int packetSize,int *count_tx);
 void send_supervision_frame(int fd,int acceptance,int *count_rx);
 
 #endif // _WRITE_H_

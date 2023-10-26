@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include "define_frame.h"
+#include "read.h"
 
 
 typedef enum

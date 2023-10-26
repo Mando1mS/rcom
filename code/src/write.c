@@ -43,7 +43,7 @@ int write_disc(int fd,LinkLayerRole rl)
     }
     
 }
-unsigned char *create_packet(int fd,unsigned char *packet,int packetSize,int *count_tx)
+unsigned char *create_packet(int fd,const unsigned char *packet,int packetSize,int *count_tx)
 {
     int framesize=6+packetSize;
     unsigned char* frame= malloc(sizeof(unsigned char)* (framesize));
