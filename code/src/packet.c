@@ -69,3 +69,10 @@ unsigned char* read_control_packet(unsigned char * received_packet,int received_
     memcpy(filename,received_packet+2+received_packet[2]+2,filename_size);
     return filename;
 }
+unsigned char* read_data_packet(unsigned char* received_packet, int received_packet_size){
+    unsigned char *buffer = malloc(sizeof(unsigned char*) *received_packet_size);
+    if(buffer)
+        memcpy(buffer,received_packet+3,received_packet_size-3);
+
+    return buffer;
+}

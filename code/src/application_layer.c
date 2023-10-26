@@ -28,7 +28,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             unsigned char *source=NULL;
             long int buffersize=0;
 
-            FILE *fp=fopen(filename,"r");
+            FILE *fp=fopen(filename,"rb");
             if(fp==NULL)
             {
                 printf("Error opening file\n");
@@ -118,8 +118,26 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             }
             unsigned char* file_name=read_control_packet(received_packet,received_packet_size, &file_size);
             llread(fd,received_packet);
+            FILE * received_file = fopen(file_name,"wb+");
+            if(received_file==NULL)
+            {
+                printf("Error opening file\n");
+                exit(-1);
+            }
+            while(TRUE){
+                while((received_packet_size=llread(fd,received_packet))==-1);
+                if(received_packet_size==0){
+                    break;
+                }else if(received_packet[0]!=3){
+                    unsigned char *buffer=read_data_packet(received_packet, received_packet_size);
+                    fwrite(buffer, sizeof(unsigned char), received_packet_size-4, received_file);
+                    free(buffer);
+                }else{
+                    continue;
+                }
+            }
+            fclose(received_file);
             free(received_packet);
             llclose(fd,role);
-            //TODO
         }
 }
