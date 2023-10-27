@@ -110,16 +110,24 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             }
 
             unsigned char *packet_end= control_packet(3,filename,buffersize,&packet_size);
+            printf("Packet end: ");
             if(llwrite(fd,packet_end,packet_size)!=1)
             {
                 free(packet_end);
                 perror("Llwrite failed for packet start.\n");
                 exit(-1);
+            }else{
+                free(packet_end);
             }
-            free(packet_end);
-            free(source);
+            printf("Packet end: ");
+            free(source-buffersize);
             printf("llwrite() executado\n");
-            llclose(fd,role);
+            if(llclose(fd,role)==1){
+                printf("Connection terminated\n");
+            }else{
+                printf("Error terminating connection\n");
+            }
+
 
     }else if(connectionParameters.role==LlRx)
         {
@@ -145,9 +153,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                 exit(-1);
             }
             printf("File opened\n");
-
             while(TRUE){
-                printf("Waiting for data packet\n");
                 while((received_packet_size=llread(fd,received_packet))==-1);
                 if(received_packet_size==0){
                     break;
@@ -159,6 +165,9 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                         exit(-1);
                     }
                     free(buffer);
+                }else if(received_packet[0]==3){
+                    printf("End of file\n");
+                    break;
                 }else{
                     continue;
                 }
@@ -168,7 +177,10 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             free(received_packet);
             printf("llread() executado\n");
             printf("Terminating connection\n");
-            llclose(fd,role);
-            printf("Connection terminated\n");
+            if(llclose(fd,role)==1){
+                printf("Connection terminated\n");
+            }else{
+                printf("Error terminating connection\n");
+            }
         }
 }

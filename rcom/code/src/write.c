@@ -42,6 +42,7 @@ unsigned char *create_packet(int fd,const unsigned char *packet,int packetSize,i
 {
     int framesize=6+packetSize;
     unsigned char* frame= malloc(sizeof(unsigned char)* (framesize));
+
     frame[0]=FLAG;
     frame[1]=A_TX;
     if(*count_tx==0){
@@ -51,20 +52,22 @@ unsigned char *create_packet(int fd,const unsigned char *packet,int packetSize,i
         frame[2]=FRAME_INF_1;
     }
     frame[3]=frame[2]^frame[1];
+
     memcpy(frame+4,packet,packetSize);
+
     //Falta byte stuffing aqui
     *j=4;
     for(int i=0;i<packetSize;i++)
     {
         if(packet[i]==FLAG)
         {
-            frame=realloc(frame,framesize++);
+            frame=realloc(frame,++framesize);
             frame[(*j)++]= FRAME_ESC;
             frame[(*j)++]= FRAME_ESC_FLAG;
         }
         else if(packet[i]==FRAME_ESC)
         {
-            frame=realloc(frame,framesize++);
+            frame=realloc(frame,++framesize);
             frame[(*j)++]= FRAME_ESC;
             frame[(*j)++]= FRAME_ESC_ESC;
         }
@@ -72,7 +75,7 @@ unsigned char *create_packet(int fd,const unsigned char *packet,int packetSize,i
             frame[(*j)++]=packet[i];
         }
     }
-    
+
     unsigned char bcc2=0x00;
     for(int i=0;i<packetSize;i++)
     {

@@ -120,8 +120,12 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
     alarmEnabled = FALSE;
     MachineState state = START;
     int j=0;
+    printf("frame created\n");
+
     unsigned char *frame=create_packet(fd,buf,bufSize,&count_tx,&j);
-    
+
+
+
     (void)signal(SIGALRM, alarmHandler);
     unsigned char byte=0x00;
     int acepted=0;
@@ -260,10 +264,14 @@ int llread(int fd, unsigned char *packet)
                 }
                 break;
             case ESC_HANDLER:
-                if(byte == FRAME_ESC_FLAG|| byte == FRAME_ESC_ESC) {
-                    packet[i++] = byte;
+                if(byte == FRAME_ESC_FLAG){
+                    packet[i++] = FLAG;
                     state = READING;
-                }else {
+                }else if (byte == FRAME_ESC_ESC) {
+                    packet[i++] = FRAME_ESC;
+                    state = READING;
+                }
+                else{
                     //If after ESC byte is not ESC_FLAG or ESC_ESC, then it is an error
                     //because bytestuffing is not being used correctly
                     state = START;
@@ -275,16 +283,25 @@ int llread(int fd, unsigned char *packet)
         //The full package was transmitted and saved in packet array
         // Now we need to check if the BCC2 is correct
         if(state == STOP){
-            printf("state %d\n",state);
-            
+
+
             //Received BCC2
             unsigned char bcc2 = packet[--i];
+            printf("BCC2: %x\n",bcc2);
             //Remove BCC2 from packet so that i can calculate current BCC2
             packet[i] = '\0';
             unsigned char calculated_bcc2 = packet[0];
+            printf("state %d\n",state);
+            //Print packet
+            printf("Packet: ");
+            for(int j=0;j<i;j++)
+            {
+                printf("%x ",packet[j]);
+            }
+            printf("\n");
             for(int j = 1; j < i; j++)
                 calculated_bcc2 ^= packet[j];
-            
+            printf("Calculated BCC2: %x\n",calculated_bcc2);
             if(bcc2 == calculated_bcc2){
                 send_supervision_frame(fd,1,&count_rx);
                 count_rx = (count_rx + 1)%2;
@@ -327,11 +344,9 @@ int llclose(int fd,const char *role)
                 //enviar o ultimo ua.
                 write_ua(fd,rl);
                 printf("Ultimo UA enviado, fechando a conexão.\n");
-                //port_restore(fd, termios *oldtio)
+                port_restore(fd);
                 close(fd);
-            }
-            else{
-                printf("Ainda não lido\n");
+                return 1;
             }
         }
     }
@@ -401,7 +416,9 @@ int llclose(int fd,const char *role)
             }               
         }
         printf("UA lido, a fechar conexão\n");
+        port_restore(fd);
         close(fd);
+        return 1;
     }
     return 0;
 }

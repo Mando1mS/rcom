@@ -23,5 +23,5 @@
 
 
 int port_connection(char *portName, int baudRate);
-int port_restore(int fd, struct termios *oldtio);
+int port_restore(int fd);
 #endif
