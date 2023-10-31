@@ -15,7 +15,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     int fd = llopen(connectionParameters);
 
     if(fd == 0){
-        perror("Error establishing port connection.");
+        perror("Error establishing port connection");
         exit(-1);
     } else{
         printf("Port connection established.\n");
@@ -144,7 +144,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             }
             unsigned char* file_name=read_control_packet(received_packet,received_packet_size, &file_size);
 
-            FILE * received_file = fopen((const char*)"penguin_received.gif","wb");
+            FILE * received_file = fopen((const char*)"penguin-received.gif","wb");
             if(received_file==NULL)
             {
                 printf("Error opening file\n");

@@ -10,7 +10,7 @@ int count_rx=0;
 int nRetransmissions = 0;
 int alarmEnabled = FALSE;
 int timeout=0;
-
+int nretransglobal=0;
 void alarmHandler(int signal)
 {
     alarmEnabled = FALSE;
@@ -26,8 +26,8 @@ int llopen(LinkLayer connectionParameters)
 {
     alarmEnabled = FALSE;
     int fd = port_connection(connectionParameters.serialPort, connectionParameters.baudRate);
-
     nRetransmissions = connectionParameters.nRetransmissions;
+    nretransglobal=nRetransmissions;
     timeout = connectionParameters.timeout;
     MachineState state = START;
     unsigned char byte = 0x00;
@@ -41,11 +41,12 @@ int llopen(LinkLayer connectionParameters)
                 write_set(fd);
                 alarm(timeout);
                 alarmEnabled = TRUE;
-                
-            } 
-
-            read(fd, &byte, 1);
-            switch (state) {
+            }
+            //while (alarmEnabled==TRUE)
+            //{
+                if(read(fd, &byte, 1)>0)
+                {   
+                switch (state) {
                 case START:
                     if(byte == FLAG) state = FLAG_RCV;
                     break;
@@ -69,9 +70,12 @@ int llopen(LinkLayer connectionParameters)
                     break;
                 default:
                     break;
-            }   
+                    }   
+                }
+            //}
+            
         }
-        if (state != STOP) return -1;
+        if (state != STOP) return 0;
         break;
     case LlRx:
         while(state!=STOP){
@@ -103,8 +107,11 @@ int llopen(LinkLayer connectionParameters)
             }               
         }
         //So manda uma vez o UA.
-        write_ua(fd,LlRx); 
-        if (state != STOP) return -1;
+        if(state==STOP)
+        {
+            write_ua(fd,LlRx); 
+        }
+        else if (state != STOP) return 0;
         break;
     default:
         return 0;   
@@ -118,6 +125,7 @@ int llopen(LinkLayer connectionParameters)
 int llwrite(int fd,const unsigned char *buf, int bufSize)
 {
     alarmEnabled = FALSE;
+    nRetransmissions=nretransglobal;
     MachineState state = START;
     int j=0;
     printf("frame created\n");
@@ -226,6 +234,7 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
 int llread(int fd, unsigned char *packet)
 {
     alarmEnabled = FALSE;
+    nRetransmissions=nretransglobal;
     MachineState state = START;
     unsigned char byte = 0x00;
     unsigned char answer=0x00;
@@ -325,6 +334,7 @@ int llread(int fd, unsigned char *packet)
 int llclose(int fd,const char *role)
 {   
     alarmEnabled = FALSE;
+    nRetransmissions=nretransglobal;
     unsigned char byte=0x00;
     MachineState state = START;
     LinkLayerRole rl=strcmp(role,"rx") ? LlTx : LlRx;
