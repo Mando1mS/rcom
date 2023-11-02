@@ -144,7 +144,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             }
             unsigned char* file_name=read_control_packet(received_packet,received_packet_size, &file_size);
 
-            FILE * received_file = fopen((const char*)file_name,"wb");
+            FILE * received_file = fopen((const char*)filename,"wb");
             if(received_file==NULL)
             {
                 printf("Error opening file\n");

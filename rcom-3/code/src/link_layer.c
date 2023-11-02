@@ -177,7 +177,7 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
                         break;
                     }
                 } else {
-            switch (state) {
+                switch (state) {
                 case START:
                     if(byte == FLAG) state = FLAG_RCV;
                     break;
@@ -223,12 +223,15 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
                 count_tx=(count_tx+1)%2;
             }
             else continue;
-        }}}
+            } 
+         }   
+        }
         if(rejected==TRUE)
         {
-            nRetransmissions--;
+            //nRetransmissions--;
             printf("A reenviar o frame\n");
             alarmEnabled = FALSE;
+            alarm(0);
             state=START;
             continue;
         }

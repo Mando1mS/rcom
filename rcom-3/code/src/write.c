@@ -46,10 +46,10 @@ unsigned char *create_packet(int fd,const unsigned char *packet,int packetSize,i
     frame[0]=FLAG;
     frame[1]=A_TX;
     if(*count_tx==0){
-        frame[2]=FRAME_INF_0;
+        frame[2]=FRAME_INF_1;
     }else
     {
-        frame[2]=FRAME_INF_1;
+        frame[2]=FRAME_INF_0;
     }
     frame[3]=frame[2]^frame[1];
 
@@ -92,11 +92,11 @@ void send_supervision_frame(int fd,int acceptance, int *count_rx){
     {
         if(*count_rx==0)
         {
-            A=FRAME_RR_0;
+            A=FRAME_RR_1;
         }
         else
         {
-            A=FRAME_RR_1;
+            A=FRAME_RR_0;
         }
     }
     else
