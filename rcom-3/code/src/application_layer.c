@@ -2,10 +2,14 @@
 
 #include "application_layer.h"
 
+clock_t start, end;
+double cpu_time_used;
+
 void applicationLayer(const char *serialPort, const char *role, int baudRate,
                       int nTries, int timeout, const char *filename)
 {
     //Comum para ambos.
+    start = clock();
     LinkLayer connectionParameters;
     strcpy(connectionParameters.serialPort,serialPort);
     connectionParameters.role= strcmp(role,"rx") ? LlTx : LlRx;
@@ -121,6 +125,9 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
             free(source-buffersize);
             printf("llwrite() executado\n");
             if(llclose(fd,role)==1){
+                end= clock();
+                cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+                printf("Time used: %02f seconds\n",cpu_time_used);
                 printf("Connection terminated\n");
             }else{
                 printf("Error terminating connection\n");
