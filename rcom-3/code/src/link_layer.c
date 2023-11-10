@@ -37,7 +37,7 @@ int llopen(LinkLayer connectionParameters)
     timeout = connectionParameters.timeout;
     MachineState state = START;
     unsigned char byte = 0x00;
-
+    
     switch (connectionParameters.role)
     {
     case LlTx:
@@ -50,11 +50,10 @@ int llopen(LinkLayer connectionParameters)
                 alarmEnabled = TRUE;
             }
             
-            while (1) {
                 int bytesRead = read(fd, &byte, 1);
                 if (bytesRead == 0) {
                     if (alarm_triggered) {
-                        break;
+                        continue;
                     }
                 } else {
                     switch (state) {
@@ -83,7 +82,6 @@ int llopen(LinkLayer connectionParameters)
                           break;
                           }
                   }
-            }
             //while (alarmEnabled==TRUE)
             //{ 
             /*
@@ -170,11 +168,10 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
                 rejected=0;
         } 
         while(alarmEnabled==TRUE && state!=STOP){
-            while (1) {
                 int bytesRead = read(fd, &byte, 1);
                 if (bytesRead == 0) {
                     if (alarm_triggered) {
-                        break;
+                        continue;
                     }
                 } else {
                 switch (state) {
@@ -223,8 +220,7 @@ int llwrite(int fd,const unsigned char *buf, int bufSize)
                 count_tx=(count_tx+1)%2;
             }
             else continue;
-            } 
-         }   
+            }    
         }
         if(rejected==TRUE)
         {
@@ -269,10 +265,9 @@ int llread(int fd, unsigned char *packet)
     unsigned char answer=0x00;
     int i=0;
     while(state!=STOP){
-    while(1){
         int bytesRead = read(fd, &byte, 1);
                 if (bytesRead == 0) {
-                        break;
+                    continue;
                 } else{
         switch (state) {
             case START:
@@ -357,7 +352,6 @@ int llread(int fd, unsigned char *packet)
         }
         }
     }
-    }
     printf("Frame lido\n");
     
     return -1;
@@ -399,32 +393,36 @@ int llclose(int fd,const char *role)
     {
         printf("A espera de receber o DISC\n");
         while(state!=STOP){
-            read(fd, &byte, 1);
-            switch (state) {
-                case START:
-                    if(byte == FLAG) state = FLAG_RCV;
-                    break;
-                case FLAG_RCV:
-                    if(byte == A_TX) state = A_RCV;
-                    else if(byte != FLAG) state = START;
-                    break;
-                case A_RCV:
-                    if(byte == FRAME_DISC) state = C_RCV;
-                    else if(byte == FLAG) state = FLAG_RCV;
-                    else state = START;
-                    break;
-                case C_RCV:
-                    if(byte == (A_TX ^ FRAME_DISC)) state = BCC_OK;
-                    else if(byte == FLAG) state = FLAG_RCV;
-                    else state = START;
-                    break;
-                case BCC_OK:
-                    if(byte == FLAG) state = STOP;
-                    else state = START;
-                    break;
-                default: 
-                    break;
-            }               
+                int bytesread = read(fd, &byte, 1);
+                if (bytesread == 0) {
+                        continue;
+                } else{
+                    switch (state) {
+                        case START:
+                            if(byte == FLAG) state = FLAG_RCV;
+                            break;
+                        case FLAG_RCV:
+                            if(byte == A_TX) state = A_RCV;
+                            else if(byte != FLAG) state = START;
+                            break;
+                        case A_RCV:
+                            if(byte == FRAME_DISC) state = C_RCV;
+                            else if(byte == FLAG) state = FLAG_RCV;
+                            else state = START;
+                            break;
+                        case C_RCV:
+                            if(byte == (A_TX ^ FRAME_DISC)) state = BCC_OK;
+                            else if(byte == FLAG) state = FLAG_RCV;
+                            else state = START;
+                            break;
+                        case BCC_OK:
+                            if(byte == FLAG) state = STOP;
+                            else state = START;
+                            break;
+                        default: 
+                            break;
+                    }               
+                }
         }
         if (state != STOP) return -1;
         //So manda uma vez o DISC.
@@ -433,32 +431,36 @@ int llclose(int fd,const char *role)
         state= START;
         printf("A espera do UA\n");
         while(state!=STOP){
-            read(fd, &byte, 1);
-            switch (state) {
-                case START:
-                    if(byte == FLAG) state = FLAG_RCV;
-                    break;
-                case FLAG_RCV:
-                    if(byte == A_TX) state = A_RCV;
-                    else if(byte != FLAG) state = START;
-                    break;
-                case A_RCV:
-                    if(byte == FRAME_UA) state = C_RCV;
-                    else if(byte == FLAG) state = FLAG_RCV;
-                    else state = START;
-                    break;
-                case C_RCV:
-                    if(byte == (A_TX ^ FRAME_UA)) state = BCC_OK;
-                    else if(byte == FLAG) state = FLAG_RCV;
-                    else state = START;
-                    break;
-                case BCC_OK:
-                    if(byte == FLAG) state = STOP;
-                    else state = START;
-                    break;
-                default: 
-                    break;
-            }               
+                int bytesread = read(fd, &byte, 1);
+                if (bytesread == 0) {
+                        continue;
+                    } else{
+                        switch (state) {
+                            case START:
+                                if(byte == FLAG) state = FLAG_RCV;
+                                break;
+                            case FLAG_RCV:
+                                if(byte == A_TX) state = A_RCV;
+                                else if(byte != FLAG) state = START;
+                                break;
+                            case A_RCV:
+                                if(byte == FRAME_UA) state = C_RCV;
+                                else if(byte == FLAG) state = FLAG_RCV;
+                                else state = START;
+                                break;
+                            case C_RCV:
+                                if(byte == (A_TX ^ FRAME_UA)) state = BCC_OK;
+                                else if(byte == FLAG) state = FLAG_RCV;
+                                else state = START;
+                                break;
+                            case BCC_OK:
+                                if(byte == FLAG) state = STOP;
+                                else state = START;
+                                break;
+                            default: 
+                                break;
+                        }               
+                }
         }
         printf("UA lido, a fechar conexão\n");
         port_restore(fd);

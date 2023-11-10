@@ -16,8 +16,9 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     connectionParameters.baudRate = baudRate;
     connectionParameters.nRetransmissions = nTries;
     connectionParameters.timeout = timeout;
-    int fd = llopen(connectionParameters);
 
+    int fd = llopen(connectionParameters);
+    
     if(fd == 0){
         perror("Error establishing port connection");
         exit(-1);

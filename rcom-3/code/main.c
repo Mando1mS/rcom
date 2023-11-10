@@ -8,7 +8,7 @@
 
 #define BAUDRATE 9600
 #define N_TRIES 4
-#define TIMEOUT 4
+#define TIMEOUT 2
 
 // Arguments:
 //   $1: /dev/ttySxx
