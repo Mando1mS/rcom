@@ -1,0 +1,77 @@
+1- Ligar dos pcs ao switch
+
+
+2- Restart network em todos os PCs
+> systemctl restart networking
+
+3- Configurar ips nos PCs
+Tux3
+> ifconfig eth0 172.16.Y0.1/24
+
+Tux4
+> ifconfig eth0 172.16.Y0.254/24
+> ifconfig eth1 172.16.Y1.253/24
+
+Tux2
+> ifconfig eth0 172.16.Y1.1/24
+
+
+4-Restart no switch (115200 baudrate)
+> /system reset-configuration
+
+
+5- criar 2 bridges 
+
+> /interface bridge add name=bridgeY0
+> /interface bridge add name=bridgeY1
+
+6-Remover portas default no switch
+
+> /interface bridge port remove [find interface=etherX]
+
+7-Adicionar portas ao switch 
+
+> /interface bridge port add bridge=bridgeY0 interface=etherX
+
+8- Adicionar rotas
+
+Tux3
+> route add -net 171.16.Y1.0/24 gw 172.16.Y0.254
+
+Tux2
+> route add -net 171.16.Y0.0/24 gw 172.16.Y1.253
+
+Tux4
+> route add -net 171.16.Y0.0/24 gw 172.16.Y1.253
+
+
+9- Ir ai Tux4 e ativar os seguintes comandos:
+>  sysctl net.ipv4.ip_forward=1
+>  sysctl net.ipv4.icmp_echo_ignore_broadcasts=0
+
+------------Esta parte foi testada com pings e funciona perfeitamente----------------
+
+9- Ligar cabo eth1 do router ao PY1
+ ligar o cabo ao eth2 do router ao switch
+
+10-Meter na bridge um a nova porta ligada ao switch ( Porta usada no passo anterior )
+> /interface bridge port add bridge=bridgeY0 interface=etherX
+
+11- Restart no router 
+>/system reset-configuration
+
+12- Configurar ips do router
+> /ip address add address=172.16.2.Y9/24 interface=ether1 (172.16.1.(...) caso estejamos na outra sala)
+> /ip address add address=172.16.Y1.254/24 interface=ether2
+
+13-Adicionar default gateway para o router
+Tux3
+route add default gw 172.16.Y0.254(esta é opcional acho)
+Tux4
+route add default gw 192.168.Y1.254
+Tux2
+route add default gw 192.168.Y1.254
+
+estes ultimos passos e melhor confirmar com o prof.
+
+
